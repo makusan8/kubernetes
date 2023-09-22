@@ -1,4 +1,4 @@
-# kubernetes
+# Kubernetes / K8s
 
 ## How-To setup basic Kubernetes cluster on a single VM
 
@@ -16,9 +16,9 @@ to change the package manager and package names accordingly.
 Once you're ready, let's start :-)
 
 
-## 1. Install & Configure base system 
+## 1. Install & Configure base system
 
-Change to root and install sudo, nala :
+Change to root and install sudo, nala(package manager) :
 
 ```bash
 su -
@@ -29,13 +29,12 @@ Add sudo right to your user, you've to relogin after that :
 
 ```bash
 adduser youruser sudo
-exit
 ```
 
-Fetch fastest mirror, choose 1
+Fetch fastest mirror, choose 1 from the prompt menu :
 
 ```bash
 sudo nala fetch
 ```
 
-
+* still work in progress..
