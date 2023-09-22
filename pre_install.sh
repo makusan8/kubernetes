@@ -3,17 +3,10 @@
 # Base script to get started on a new vm (Debian-12 minimal)
 ###########################################################
 
-
-# nala package manager
-echo '###Choosing fastest mirror for nala package manager..'
-
-nala fetch
-sleep 2
-
 # install some utility
 echo '###Installing utility apps..'
 
-nala install ethtool htop net-tools tree neovim -y
+nala install git ethtool htop net-tools tree neovim -y
 sleep 2
 
 # configure sysctl tweaks
