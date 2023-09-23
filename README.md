@@ -1,13 +1,13 @@
 
 # Kubernetes / K8s
 
-## How-To setup basic Kubernetes cluster on a single VM
+## How-To setup basic Kubernetes cluster in a single VM
 
 Prequisites (at least):
   - Debian 12 minimal
   - 2 core
   - 2gb ram
-  - 30gb hd
+  - 20gb hd
   - nala package manager
   - sudo right
 
@@ -41,7 +41,7 @@ Edit sudoers file, so we don't have to enter password everytime we run sudo :
 
 ```
 sudo visudo
-
+...
 %sudo ALL=(ALL) NOPASSWD:ALL
 ```
 
@@ -54,11 +54,11 @@ sudo nala fetch
 We're gonna apply few settings to our base vm :
 
   - install basic utility tools
-  - configure sysctl tweaks
-  - disable transparent hubpages
-  - disable swap 
+  - these are useful especially for vm :
+    - configure sysctl tweaks
+    - disable transparent hubpages
 
-Clone this repository, and run the script :
+clone this repository, and run the script :
 
 ```bash
 git clone https://github.com/makusan8/kubernetes.git
@@ -68,4 +68,5 @@ sudo ./pre_install.sh
 ```
 
 
-## 2. Install & Configure Kubernetes / K8s
+## 2. Preparing for our Kubernetes / K8s
+
