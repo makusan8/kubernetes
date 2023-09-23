@@ -71,10 +71,12 @@ chmod +x pre_install.sh
 sudo ./pre_install.sh
 ```
 
+[!NOTE]
+test.
 
 ## 2. Enable some config for Kubernetes / K8s
 
-Before we start installing, we need to disable swap and enable few more tweaks to
+Before we start installing k8s, we need to disable swap and enable few more tweaks to
 our system, these are required for k8s or it won't work. 
 
 Ensure swap is disabled :
@@ -99,21 +101,18 @@ leaving us with an empty space as well. Let's fix that :
 # verify your lv first
 sudo lvs
 
-# remove swap lv, doing this will free the swap space
+# remove swap lv, doing this will detach the swap space
 sudo lvremove debian-vg/swap_1
 
-# expand the root volume to use that empty space
+# expand the root volume to use that empty swap space
 sudo lvextend -r -l +100%FREE debian-vg/root
-
-# reboot
-sudo reboot
 ```
 
-Load the bridge, overlay modules and enable ip routing
+Load the bridge, overlay modules and enable ip routing :
 
 ```bash 
 # add this in k8s.conf
-sudo tee /etc/modules-load.d/k8s.conf <<EOF
+sudo tee /etc/modules-load.d/k8s.conf<<EOF
 overlay
 br_netfilter
 EOF
@@ -131,7 +130,11 @@ EOF
 
 # reload our sysctl
 sudo sysctl --system
+
+# reboot
+sudo reboot
 ```
+
 
 
 
