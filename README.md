@@ -129,7 +129,11 @@ EOF
 
 # reload our sysctl
 sudo sysctl --system
+
+# reboot
+sudo reboot
 ```
+
 
 ## 3. Install CRI-O Container Runtime & K8s
 
@@ -139,13 +143,13 @@ to Containerd or Docker :
 
 ```bash
 # install requirements
-sudo nala install -y gnupg2 \
+sudo nala install gnupg2 \
 curl lsb-release \
 apt-transport-https \
 ca-certificates \
-software-properties-common
+software-properties-common -y
 
-# set variables in terminal
+# set variables, type this in terminal
 OS=Debian_12
 VERSION=1.26
 
@@ -179,10 +183,32 @@ sudo crictl info
 
 ```
 
+And now our final install k8s :
+
+```bash
+
+# import key
+curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo gpg --dearmour -o /etc/apt/trusted.gpg.d/cgoogle.gpg
+
+# enable k8s repo
+sudo tee /etc/apt/sources.list.d/kubernetes.list<<EOF
+deb http://apt.kubernetes.io/ kubernetes-xenial main
+# deb-src http://apt.kubernetes.io/ kubernetes-xenial main
+EOF
+
+# install k8s
+sudo nala update
+sudo nala install -y kubelet kubeadm kubectl
+
+# pin k8s package
+sudo apt-mark hold kubelet kubeadm kubectl
+
+```
+
+
+## 4. Start K8s Cluster
+
 
 
 * still in progress..
-
-
-
 
