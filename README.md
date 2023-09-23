@@ -38,9 +38,10 @@ adduser youruser sudo
 ```
 
 Edit sudoers file, so we don't have to enter password everytime we run sudo :
-sudo visudo
 
 ```
+sudo visudo
+
 %sudo ALL=(ALL) NOPASSWD:ALL
 ```
 
@@ -57,5 +58,14 @@ We're gonna apply few settings to our base vm :
   - disable transparent hubpages
   - disable swap 
 
-(Optional) Clone this repository
+Clone this repository, and run the script :
 
+```bash
+git clone https://github.com/makusan8/kubernetes.git
+cd kubernetes
+chmod +x pre_install.sh
+sudo ./pre_install.sh
+```
+
+
+## 2. Install & Configure Kubernetes / K8s
