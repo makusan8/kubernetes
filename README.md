@@ -149,7 +149,7 @@ apt-transport-https \
 ca-certificates \
 software-properties-common -y
 
-# set variables, type this in terminal
+# set variables, copy this in terminal
 OS=Debian_12
 VERSION=1.26
 
@@ -183,7 +183,9 @@ sudo crictl info
 
 ```
 
-And now our final install k8s :
+And now our final install k8s,
+
+There are mainly kubectl, kubelet, kubeadm :
 
 ```bash
 
