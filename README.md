@@ -73,9 +73,6 @@ sudo ./pre_install.sh
 
 ## 2. Enable some config for Kubernetes / K8s
 
-> [!NOTE]
-> test.
-
 Before we start installing k8s, we need to disable swap and enable few more tweaks to
 our system, these are required for k8s or it won't work. 
 
@@ -108,6 +105,16 @@ sudo lvremove debian-vg/swap_1
 sudo lvextend -r -l +100%FREE debian-vg/root
 ```
 
+> [!NOTE]
+> If you want to automatically install k8s, 
+> you can just run my script ks8_install.sh
+> this will cover the installation until step 3 : 
+>
+> chmod +x ks8_install.sh
+> sudo ./ks8_install.sh
+
+### For manual way, let's follow along below :
+
 Load the bridge, overlay modules and enable ip routing :
 
 ```bash 
@@ -130,9 +137,6 @@ EOF
 
 # reload our sysctl
 sudo sysctl --system
-
-# reboot
-sudo reboot
 ```
 
 
@@ -186,7 +190,7 @@ sudo crictl info
 
 ```
 
-And now finally our k8s,
+And now for our k8s,
 
 There are mainly kubectl, kubelet, kubeadm :
 
@@ -213,6 +217,8 @@ sudo apt-mark hold kubelet kubeadm kubectl
 sudo systemctl daemon-reload
 sudo systemctl enable kubelet
 ```
+
+Finally done..
 
 
 ## 4. Start K8s Cluster
