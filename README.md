@@ -72,10 +72,10 @@ sudo ./pre_install.sh
 ```
 
 
-## 2. Installing Kubernetes / K8s
+## 2. Enable some config for Kubernetes / K8s
 
 Before we start installing, we need to disable swap and enable few more tweaks to
-our system, there are required for k8s or it won't work. 
+our system, these are required for k8s or it won't work. 
 
 Ensure swap is disabled :
 
@@ -84,11 +84,11 @@ Ensure swap is disabled :
 sudo swapoff -a
 
 # disable swap in fstab
-cp /etc/fstab /etc/fstab.orig
-sed -e '/swap/ s/^#*/#/g' -i /etc/fstab
+sudo cp /etc/fstab /etc/fstab.orig
+sudo sed -e '/swap/ s/^#*/#/g' -i /etc/fstab
 
 # disable swap in initramfs-tools
-sed -e '/RESUME/ s/^#*/#/g' -i /etc/initramfs-tools/conf.d/resume
+sudo sed -e '/RESUME/ s/^#*/#/g' -i /etc/initramfs-tools/conf.d/resume
 ```
 
 (Optional) During my OS installation, I've selected full-guided LVM for my disk and 
@@ -100,13 +100,38 @@ leaving us with an empty space as well. Let's fix that :
 sudo lvs
 
 # remove swap lv, doing this will free the swap space
-lvremove debian-vg/swap_1
+sudo lvremove debian-vg/swap_1
 
 # expand the root volume to use that empty space
-lvextend -r -l +100%FREE debian-vg/root
+sudo lvextend -r -l +100%FREE debian-vg/root
 
+# reboot
+sudo reboot
 ```
 
+Load the bridge, overlay modules and enable ip routing
+
+```bash 
+# add this in k8s.conf
+sudo tee /etc/modules-load.d/k8s.conf <<EOF
+overlay
+br_netfilter
+EOF
+
+# load modules
+sudo modprobe overlay
+sudo modprobe br_netfilter
+
+# enable sysctl ip routing & bridging
+sudo tee /etc/sysctl.d/kubernetes.conf<<EOF
+net.bridge.bridge-nf-call-ip6tables = 1
+net.bridge.bridge-nf-call-iptables = 1
+net.ipv4.ip_forward = 1
+EOF
+
+# reload our sysctl
+sudo sysctl --system
+```
 
 
 
