@@ -71,7 +71,8 @@ chmod +x pre_install.sh
 sudo ./pre_install.sh
 ```
 
-[!NOTE] test.
+> [!NOTE]
+> test.
 
 ## 2. Enable some config for Kubernetes / K8s
 
