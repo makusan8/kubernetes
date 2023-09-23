@@ -71,10 +71,10 @@ chmod +x pre_install.sh
 sudo ./pre_install.sh
 ```
 
+## 2. Enable some config for Kubernetes / K8s
+
 > [!NOTE]
 > test.
-
-## 2. Enable some config for Kubernetes / K8s
 
 Before we start installing k8s, we need to disable swap and enable few more tweaks to
 our system, these are required for k8s or it won't work. 
@@ -145,7 +145,9 @@ to Containerd or Docker :
 ```bash
 # install requirements
 sudo nala install gnupg2 \
-curl lsb-release \
+libseccomp2 \
+curl \
+lsb-release \
 apt-transport-https \
 ca-certificates \
 software-properties-common -y
@@ -154,19 +156,19 @@ software-properties-common -y
 OS=Debian_12
 VERSION=1.26
 
-# add Kubic Repo
+# add Kubic Repo, copy this in one sentence
 echo "deb https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/$OS/ /" | \
 sudo tee /etc/apt/sources.list.d/devel:kubic:libcontainers:stable.list
 
-# import public key
+# import public key, copy this in one sentence
 curl -L https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/$OS/Release.key | \
 sudo apt-key add -
 
-# add cri-o repo
+# add cri-o repo, copy this in one sentence
 echo "deb http://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable:/cri-o:/$VERSION/$OS/ /" | \
 sudo tee /etc/apt/sources.list.d/devel:kubic:libcontainers:stable:cri-o:$VERSION.list
 
-# import another public key
+# import another public key, copy this in one sentence
 curl -L https://download.opensuse.org/repositories/devel:kubic:libcontainers:stable:cri-o:$VERSION/$OS/Release.key | \
 sudo apt-key add -
 
@@ -184,14 +186,15 @@ sudo crictl info
 
 ```
 
-And now our final install k8s,
+And now finally our k8s,
 
 There are mainly kubectl, kubelet, kubeadm :
 
 ```bash
 
-# import key
-curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo gpg --dearmour -o /etc/apt/trusted.gpg.d/cgoogle.gpg
+# import key, copy this in one sentence
+curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | \ 
+sudo gpg --dearmour -o /etc/apt/trusted.gpg.d/cgoogle.gpg
 
 # enable k8s repo
 sudo tee /etc/apt/sources.list.d/kubernetes.list<<EOF
@@ -206,6 +209,9 @@ sudo nala install -y kubelet kubeadm kubectl
 # pin k8s package
 sudo apt-mark hold kubelet kubeadm kubectl
 
+# reload systemctl
+sudo systemctl daemon-reload
+sudo systemctl enable kubelet
 ```
 
 
