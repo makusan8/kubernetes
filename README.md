@@ -41,9 +41,11 @@ adduser youruser sudo
 Edit sudoers file, so we don't have to enter password everytime we run it :
 
 ```
+# from your terminal
 sudo visudo
 ...
 
+# add NOPASSWD: in sudoers
 %sudo ALL=(ALL) NOPASSWD:ALL
 ```
 
@@ -87,6 +89,22 @@ sed -e '/swap/ s/^#*/#/g' -i /etc/fstab
 
 # disable swap in initramfs-tools
 sed -e '/RESUME/ s/^#*/#/g' -i /etc/initramfs-tools/conf.d/resume
+```
+
+(Optional) During my OS installation, I've selected full-guided LVM for my disk and 
+even if we've disabled the swap above, the logical volume for that swap still exists,
+leaving us with an empty space as well. Let's fix that :
+
+```bash
+# verify your lv first
+sudo lvs
+
+# remove swap lv, doing this will free the swap space
+lvremove debian-vg/swap_1
+
+# expand the root volume to use that empty space
+lvextend -r -l +100%FREE debian-vg/root
+
 ```
 
 
