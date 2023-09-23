@@ -11,14 +11,14 @@ Prequisites (at least):
   - nala package manager
   - sudo right
 
-I'll be using freshly installed Debian 12 (minimal) as my vm,
+I'll be using freshly installed Debian 12 (minimal) as my VM,
 you can either use other distro of your choice as well. Be sure
 to change the package manager and package names accordingly.
 
 Once you're ready, let's start :-)
 
 
-## 1. Install & Configure base system
+## 1. Preparing our base vm
 
 Debian minimal usually don't have sudo installed by default,
 unless you didn't specify root password during your os installation.
@@ -37,7 +37,7 @@ Add sudo right to your user, you've to exit & relogin after that :
 adduser youruser sudo
 ```
 
-Edit sudoers file, so we don't have to enter password everytime we run sudo :
+Edit sudoers file, so we don't have to enter password everytime we run it :
 
 ```
 sudo visudo
@@ -51,7 +51,7 @@ Let's fetch the fastest mirror for nala, choose 1 from the prompt menu :
 sudo nala fetch
 ```
 
-We're gonna apply few settings to our base vm :
+We're gonna apply few settings to our base VM :
 
   - install basic utility tools
   - these are useful especially for vm :
@@ -68,5 +68,30 @@ sudo ./pre_install.sh
 ```
 
 
-## 2. Preparing for our Kubernetes / K8s
+## 2. Installing Kubernetes / K8s
+
+Before we start installing, we need to disable swap and enable few more tweaks to
+our system, there are required for k8s or it won't work. 
+
+Ensure swap is disabled :
+
+```bash
+# turn off swap
+sudo swapoff -a
+
+# disable swap in fstab
+cp /etc/fstab /etc/fstab.orig
+sed -e '/swap/ s/^#*/#/g' -i /etc/fstab
+
+# disable swap in initramfs-tools
+sed -e '/RESUME/ s/^#*/#/g' -i /etc/initramfs-tools/conf.d/resume
+```
+
+
+
+
+* still in progress..
+
+
+
 
