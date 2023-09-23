@@ -71,8 +71,7 @@ chmod +x pre_install.sh
 sudo ./pre_install.sh
 ```
 
-[!NOTE]
-test.
+[!NOTE] test.
 
 ## 2. Enable some config for Kubernetes / K8s
 
@@ -130,11 +129,55 @@ EOF
 
 # reload our sysctl
 sudo sysctl --system
-
-# reboot
-sudo reboot
 ```
 
+## 3. Install CRI-O Container Runtime & K8s
+
+Let's continue to install our container first,
+we'll be using CRI-O, this is the easiest runtime to setup compare
+to Containerd or Docker :
+
+```bash
+# install requirements
+sudo nala install -y gnupg2 \
+curl lsb-release \
+apt-transport-https \
+ca-certificates \
+software-properties-common
+
+# set variables in terminal
+OS=Debian_12
+VERSION=1.26
+
+# add Kubic Repo
+echo "deb https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/$OS/ /" | \
+sudo tee /etc/apt/sources.list.d/devel:kubic:libcontainers:stable.list
+
+# import public key
+curl -L https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/$OS/Release.key | \
+sudo apt-key add -
+
+# add cri-o repo
+echo "deb http://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable:/cri-o:/$VERSION/$OS/ /" | \
+sudo tee /etc/apt/sources.list.d/devel:kubic:libcontainers:stable:cri-o:$VERSION.list
+
+# import another public key
+curl -L https://download.opensuse.org/repositories/devel:kubic:libcontainers:stable:cri-o:$VERSION/$OS/Release.key | \
+sudo apt-key add -
+
+# install cri-o
+sudo nala update && sudo nala upgrade -y
+sudo nala install cri-o cri-o-runc cri-tools -y
+
+# start cri-o
+sudo systemctl enable crio.service
+sudo systemctl start crio.service
+
+# check cri-o status
+sudo systemctl status crio.service
+sudo crictl info
+
+```
 
 
 
