@@ -28,6 +28,7 @@ Change to root and install sudo, nala(package manager), git :
 
 ```bash
 su -
+
 apt install sudo nala git -y
 ```
 
@@ -42,6 +43,7 @@ Edit sudoers file, so we don't have to enter password everytime we run it :
 ```
 sudo visudo
 ...
+
 %sudo ALL=(ALL) NOPASSWD:ALL
 ```
 
@@ -60,7 +62,7 @@ We're gonna apply few settings to our base VM :
 
 clone this repository, and run the script :
 
-```bash
+```
 git clone https://github.com/makusan8/kubernetes.git
 cd kubernetes
 chmod +x pre_install.sh
