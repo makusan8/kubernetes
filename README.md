@@ -326,7 +326,7 @@ kube-system   coredns-5dd5756b68-lcwvm         0/1     ContainerCreating
 As you can see, the coredns pods above are in Creating/Pending state. These pods
 are responsible for our internal DNS inside the cluster.
 
-It turns out we don't have any network plugin yet in our cluster.
+It turns out that we don't have any network plugin yet in our cluster.
 
 So let's install that, we're gonna use calico plugin :
 
@@ -348,8 +348,8 @@ watch kubectl get pods -n kube-system
 
 ```
 
-If you've noticed, there are two coredns running in our cluster. For single vm we
-don't need that, because we're just running in single node.
+If you've noticed, there are two coredns running in our cluster. For single VM we
+don't really need that, because we're just running in single node.
 
 Trim down the CoreDNS :
 
@@ -365,7 +365,7 @@ spec:
 
 ```
 
-Check again the CoreDNS :
+Now we only have one pod of CoreDNS :
 
 ```
 # check dns
@@ -384,7 +384,7 @@ kube-scheduler-master                      1/1     Running   0          60m
 
 ```
 
-Let's check again our nodes status :
+Let's see again our nodes status :
 
 ```
 # node status
