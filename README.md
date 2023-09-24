@@ -25,7 +25,7 @@ Debian minimal usually don't have sudo installed by default,
 unless you didn't specify root password during your os installation.
 
 
-Change to root and install sudo, nala(package manager), git :
+- Change to root and install sudo, nala(package manager), git :
 
 ```bash
 
@@ -35,7 +35,7 @@ apt install sudo nala git -y
 
 ```
 
-Add sudo right to your user, you've to exit & relogin after that :
+- Add sudo right to your user, you've to exit & relogin after that :
 
 ```bash
 
@@ -43,7 +43,7 @@ adduser youruser sudo
 
 ```
 
-Edit sudoers file, so we don't have to enter password everytime we run it :
+- Edit sudoers file, so we don't have to enter password everytime we run it :
 
 ```
 
@@ -57,7 +57,7 @@ sudo visudo
 
 ```
 
-Fetch the fastest mirror for nala, choose 1 from the prompt menu :
+- Fetch the fastest mirror for nala, choose 1 from the prompt menu :
 
 ```bash
 
@@ -72,7 +72,7 @@ We're gonna apply few settings to our base VM :
     - configure sysctl tweaks
     - disable transparent hubpages
 
-clone this repository, and run the script :
+- clone this repository, and run the script :
 
 ```
 
@@ -163,9 +163,10 @@ sudo sysctl --system
 
 ## 3. Install CRI-O Container Runtime & K8s
 
-- Let's continue to install our container first,
-we'll be using CRI-O, this is the easiest runtime to setup compare
-to Containerd or Docker :
+We'll be using CRI-O, this is the easiest runtime to setup compare
+to Containerd or Docker
+
+- Let's continue to install our container first :
 
 ```bash
 
@@ -293,7 +294,7 @@ sudo chown $(id -u):$(id -g) $HOME/.kube/config
 
 ```
 
-Now, we can run kubectl command without sudo.
+We can just run kubectl command without sudo.
 
 - Let's check our node :
 
@@ -323,15 +324,14 @@ kube-system   coredns-5dd5756b68-lcwvm         0/1     ContainerCreating
 
 ```
 
-As you can see, the coredns pods above are in Creating/Pending state. These pods
-are responsible for our internal DNS inside the cluster.
+As you can see above, the coredns pods are in Creating/Pending state. These pods
+are responsible to our internal DNS.
 
 It turns out that we don't have any network plugin yet in our cluster.
 
 - Install the calico network plugin :
 
 ```
-
 # install calico network plugin
 kubectl apply -f https://projectcalico.docs.tigera.io/manifests/calico.yaml
 
@@ -349,7 +349,7 @@ watch kubectl get pods -n kube-system
 ```
 
 If you've noticed, there are two coredns currently running in our cluster.
-For single VM we don't really need that, because we're just running in single node.
+For single VM we don't really need that, because we're just running it in single node.
 
 - Scale down the CoreDNS :
 
