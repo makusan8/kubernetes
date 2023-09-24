@@ -424,7 +424,7 @@ master   Ready    control-plane,worker   18h   v1.28.2
 
 ```
 
-Great! now we can start testing out our cluster by deploying a test app into it.
+Great! now we can start testing out our cluster by deploying a test app.
 
 - Create a test yaml file (nginx) :
 
