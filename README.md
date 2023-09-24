@@ -57,7 +57,7 @@ sudo visudo
 
 ```
 
-Let's fetch the fastest mirror for nala, choose 1 from the prompt menu :
+Fetch the fastest mirror for nala, choose 1 from the prompt menu :
 
 ```bash
 
@@ -86,9 +86,9 @@ sudo ./pre_install.sh
 ## 2. Enable some config for Kubernetes / K8s
 
 Before we start installing k8s, we need to disable swap and enable few more tweaks to
-our system, these are required for k8s or it won't work. 
+our system, these are required for k8s or it won't work properly. 
 
-Ensure swap is disabled :
+- Ensure swap is disabled :
 
 ```bash
 
@@ -134,7 +134,7 @@ sudo ./ks8_install.sh
 
 ### For manual way, let's follow along below :
 
-Load the bridge, overlay modules and enable ip routing :
+- Load the bridge, overlay modules and enable ip routing :
 
 ```bash 
 
@@ -163,7 +163,7 @@ sudo sysctl --system
 
 ## 3. Install CRI-O Container Runtime & K8s
 
-Let's continue to install our container first,
+- Let's continue to install our container first,
 we'll be using CRI-O, this is the easiest runtime to setup compare
 to Containerd or Docker :
 
@@ -212,9 +212,9 @@ sudo crictl info
 
 ```
 
-And now for our k8s,
+For our k8s,
 
-There are mainly kubectl, kubelet, kubeadm :
+- Install kubectl, kubelet, kubeadm :
 
 ```bash
 
@@ -232,7 +232,7 @@ EOF
 sudo nala update
 sudo nala install -y kubelet kubeadm kubectl
 
-# pin k8s package
+# hold k8s packages to prevent upgrade
 sudo apt-mark hold kubelet kubeadm kubectl
 
 # reload systemctl
@@ -246,16 +246,16 @@ Finally we're almost ready..
 
 ## 4. Start K8s Cluster
 
-Now we can start and initiate our cluster :
+Now we can start initiating our cluster :
 
-[!NOTE]
+> [!NOTE]
 > the --pod-network-cidr ip range below is optional,
 > as long it doesn't interfere with our LAN network.
 
 ```
 
 # initiate cluster
-cd ~/
+
 sudo kubeadm init --node-name master --pod-network-cidr=192.168.0.0/16
 
 ```
@@ -263,7 +263,7 @@ sudo kubeadm init --node-name master --pod-network-cidr=192.168.0.0/16
 The cluster will take some time to finish, because it will download
 few images first and store them into cri-o container.
 
-Once it's finished, verify the images : 
+- Once it's finished, you can see the images : 
 
 ```
 
@@ -282,7 +282,7 @@ registry.k8s.io/pause                     3.9
 
 ```
 
-Let's make kubectl work for current user :
+- Let's make kubectl work for current user :
 
 ```
 
@@ -295,7 +295,7 @@ sudo chown $(id -u):$(id -g) $HOME/.kube/config
 
 Now, we can run kubectl command without sudo.
 
-Let's verify our node :
+- Let's check our node :
 
 ```
 # check the nodes
@@ -310,7 +310,7 @@ kubectl get nodes -o wide
 
 ```
 
-Cluster pods :
+- View cluster pods :
 
 ```
 # check the pods
@@ -328,16 +328,16 @@ are responsible for our internal DNS inside the cluster.
 
 It turns out that we don't have any network plugin yet in our cluster.
 
-So let's install that, we're gonna use calico plugin :
+- Install the calico network plugin :
 
 ```
 
-# install calico network add-on
+# install calico network plugin
 kubectl apply -f https://projectcalico.docs.tigera.io/manifests/calico.yaml
 
 ```
 
-You can watch and wait the status until all the pods are running :
+- Wait until all the pods status are running :
 
 ```
 
@@ -348,10 +348,10 @@ watch kubectl get pods -n kube-system
 
 ```
 
-If you've noticed, there are two coredns running in our cluster. For single VM we
-don't really need that, because we're just running in single node.
+If you've noticed, there are two coredns currently running in our cluster.
+For single VM we don't really need that, because we're just running in single node.
 
-Trim down the CoreDNS :
+- Scale down the CoreDNS :
 
 ```
 # edit the coredns config 
@@ -365,7 +365,7 @@ spec:
 
 ```
 
-Now we only have one pod of CoreDNS :
+- Now we only have one pod of coredns running :
 
 ```
 # check dns
@@ -384,7 +384,7 @@ kube-scheduler-master                      1/1     Running   0          60m
 
 ```
 
-Let's see again our nodes status :
+- Let's check again our nodes status :
 
 ```
 # node status
