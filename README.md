@@ -28,32 +28,41 @@ unless you didn't specify root password during your os installation.
 Change to root and install sudo, nala(package manager), git :
 
 ```bash
+
 su -
 
 apt install sudo nala git -y
+
 ```
 
 Add sudo right to your user, you've to exit & relogin after that :
 
 ```bash
+
 adduser youruser sudo
+
 ```
 
 Edit sudoers file, so we don't have to enter password everytime we run it :
 
 ```
+
 # from your terminal
 sudo visudo
+
 ...
 
 # add NOPASSWD: in sudoers
 %sudo ALL=(ALL) NOPASSWD:ALL
+
 ```
 
 Let's fetch the fastest mirror for nala, choose 1 from the prompt menu :
 
 ```bash
+
 sudo nala fetch
+
 ```
 
 We're gonna apply few settings to our base VM :
@@ -66,10 +75,12 @@ We're gonna apply few settings to our base VM :
 clone this repository, and run the script :
 
 ```
+
 git clone https://github.com/makusan8/kubernetes.git
 cd kubernetes
 chmod +x pre_install.sh
 sudo ./pre_install.sh
+
 ```
 
 ## 2. Enable some config for Kubernetes / K8s
@@ -80,6 +91,7 @@ our system, these are required for k8s or it won't work.
 Ensure swap is disabled :
 
 ```bash
+
 # turn off swap
 sudo swapoff -a
 
@@ -89,6 +101,7 @@ sudo sed -e '/swap/ s/^#*/#/g' -i /etc/fstab
 
 # disable swap in initramfs-tools
 sudo sed -e '/RESUME/ s/^#*/#/g' -i /etc/initramfs-tools/conf.d/resume
+
 ```
 
 (Optional) During my OS installation, I've selected full-guided LVM for my disk and 
@@ -96,6 +109,7 @@ even if we've disabled the swap above, the logical volume for that swap still ex
 leaving us with an empty space as well. Let's fix that :
 
 ```bash
+
 # verify your lv first
 sudo lvs
 
@@ -104,6 +118,7 @@ sudo lvremove debian-vg/swap_1
 
 # expand the root volume to use that empty swap space
 sudo lvextend -r -l +100%FREE debian-vg/root
+
 ```
 
 > [!NOTE]
@@ -111,15 +126,18 @@ sudo lvextend -r -l +100%FREE debian-vg/root
 > you can just run my script ks8_install.sh
 > this will cover the installation until step 3 : 
 
-> [!NOTE]
-> chmod +x ks8_install.sh
-> sudo ./ks8_install.sh
+```
+chmod +x ks8_install.sh
+sudo ./ks8_install.sh
+
+```
 
 ### For manual way, let's follow along below :
 
 Load the bridge, overlay modules and enable ip routing :
 
 ```bash 
+
 # add this in k8s.conf
 sudo tee /etc/modules-load.d/k8s.conf<<EOF
 overlay
@@ -139,6 +157,7 @@ EOF
 
 # reload our sysctl
 sudo sysctl --system
+
 ```
 
 
@@ -149,6 +168,7 @@ we'll be using CRI-O, this is the easiest runtime to setup compare
 to Containerd or Docker :
 
 ```bash
+
 # install requirements
 sudo nala install gnupg2 \
 libseccomp2 \
@@ -218,9 +238,10 @@ sudo apt-mark hold kubelet kubeadm kubectl
 # reload systemctl
 sudo systemctl daemon-reload
 sudo systemctl enable kubelet
+
 ```
 
-Finally done for our installation..
+Finally we're almost ready..
 
 
 ## 4. Start K8s Cluster
@@ -232,17 +253,20 @@ Now we can start and initiate our cluster :
 > as long it doesn't interfere with our LAN network.
 
 ```
+
 # initiate cluster
 cd ~/
 sudo kubeadm init --node-name master --pod-network-cidr=192.168.0.0/16
+
 ```
 
-The cluster will take some time to finish, because it will download first
-few images and store them into cri-o container.
+The cluster will take some time to finish, because it will download
+few images first and store them into cri-o container.
 
 Once it's finished, verify the images : 
 
 ```
+
 # check the images
 sudo crictl images
 
@@ -261,6 +285,7 @@ registry.k8s.io/pause                     3.9
 Let's make kubectl work for current user :
 
 ```
+
 # copy kubectl config
 mkdir -p $HOME/.kube
 sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
@@ -282,6 +307,7 @@ master   Ready    control-plane   28m   v1.28.2
 
 # full view of the nodes
 kubectl get nodes -o wide
+
 ```
 
 Cluster pods :
@@ -302,9 +328,10 @@ are responsible for our internal DNS inside the cluster.
 
 It turns out we don't have any network plugin yet in our cluster.
 
-So let's install that, we're gonna use calico :
+So let's install that, we're gonna use calico plugin :
 
 ```
+
 # install calico network add-on
 kubectl apply -f https://projectcalico.docs.tigera.io/manifests/calico.yaml
 
@@ -313,10 +340,12 @@ kubectl apply -f https://projectcalico.docs.tigera.io/manifests/calico.yaml
 You can watch and wait the status until all the pods are running :
 
 ```
+
 # watch the pods progress
 watch kubectl get pods -n kube-system
 
-# control + c after all are running
+# control + c to stop after all the pods are running
+
 ```
 
 If you've noticed, there are two coredns running in our cluster. For single vm we
@@ -355,11 +384,16 @@ kube-scheduler-master                      1/1     Running   0          60m
 
 ```
 
-We also can see the information of our node from various commands :
+Let's check again our nodes status :
 
 ```
+# node status
 kubectl get nodes -o wide
+
+# cluster information
 kubectl cluster-info
+
+# global health check
 kubectl get --raw='/readyz?verbose'
 
 ```
