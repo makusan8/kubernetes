@@ -390,7 +390,7 @@ By default, K8s assumes you will be connecting other nodes to your master node
 to make a 'proper' cluster. So to stop us from placing our Pods in the master,
 they have applied a taint to your node, which is called 'NoSchedule'.
 
-And we need to remove it's taint mode. Otherwise, our pods will be stuck
+And we need to remove it's taint mode. Otherwise, our pods will be stucked
 in a pending state.
 
 - Check the taints :
