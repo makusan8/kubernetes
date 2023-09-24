@@ -28,9 +28,7 @@ unless you didn't specify root password during your os installation.
 - Change to root and install sudo, nala(package manager), git :
 
 ```bash
-
 su -
-
 apt install sudo nala git -y
 
 ```
@@ -38,7 +36,6 @@ apt install sudo nala git -y
 - Add sudo right to your user, you've to exit & relogin after that :
 
 ```bash
-
 adduser youruser sudo
 
 ```
@@ -51,7 +48,6 @@ adduser youruser sudo
 sudo visudo
 
 ...
-
 # add NOPASSWD: in sudoers
 %sudo ALL=(ALL) NOPASSWD:ALL
 
@@ -60,7 +56,6 @@ sudo visudo
 - Fetch the fastest mirror for nala, choose 1 from the prompt menu :
 
 ```bash
-
 sudo nala fetch
 
 ```
@@ -75,7 +70,6 @@ We're gonna apply few settings to our base VM :
 - clone this repository, and run the script :
 
 ```
-
 git clone https://github.com/makusan8/kubernetes.git
 cd kubernetes
 chmod +x pre_install.sh
@@ -91,7 +85,6 @@ our system, these are required for k8s or it won't work properly.
 - Ensure swap is disabled :
 
 ```bash
-
 # turn off swap
 sudo swapoff -a
 
@@ -109,7 +102,6 @@ even if we've disabled the swap above, the logical volume for that swap still ex
 leaving us with an empty space as well. Let's fix that :
 
 ```bash
-
 # verify your lv first
 sudo lvs
 
@@ -137,7 +129,6 @@ sudo ./ks8_install.sh
 - Load the bridge, overlay modules and enable ip routing :
 
 ```bash 
-
 # add this in k8s.conf
 sudo tee /etc/modules-load.d/k8s.conf<<EOF
 overlay
@@ -169,7 +160,6 @@ to Containerd or Docker
 - Let's continue to install our container first :
 
 ```bash
-
 # install requirements
 sudo nala install gnupg2 \
 libseccomp2 \
@@ -218,7 +208,6 @@ For our k8s,
 - Install kubectl, kubelet, kubeadm :
 
 ```bash
-
 # import key, copy this in one sentence
 curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | \ 
 sudo gpg --dearmour -o /etc/apt/trusted.gpg.d/cgoogle.gpg
@@ -254,8 +243,7 @@ Now we can start initiating our cluster :
 > as long it doesn't interfere with our LAN network.
 
 ```
-
-# initiate cluster
+# initiate the cluster
 
 sudo kubeadm init --node-name master --pod-network-cidr=192.168.0.0/16
 
@@ -267,11 +255,10 @@ few images first and store them into cri-o container.
 - Once it's finished, you can see the images : 
 
 ```
-
 # check the images
 sudo crictl images
 
-# -- output from command above
+# --output from command above
 registry.k8s.io/coredns/coredns           v1.10.1
 registry.k8s.io/etcd                      3.5.9-0 
 registry.k8s.io/kube-apiserver            v1.28.2 
@@ -286,7 +273,6 @@ registry.k8s.io/pause                     3.9
 - Let's make kubectl work for current user :
 
 ```
-
 # copy kubectl config
 mkdir -p $HOME/.kube
 sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
@@ -302,7 +288,7 @@ We can just run kubectl command without sudo.
 # check the nodes
 kubectl get nodes
 
-# -- output from above command
+# --output from above command
 NAME     STATUS   ROLES           AGE   VERSION
 master   Ready    control-plane   28m   v1.28.2
 
@@ -317,7 +303,7 @@ kubectl get nodes -o wide
 # check the pods
 kubectl get pods --all-namespaces -o wide
 
-# -- output from above command
+# --output from above command
 NAMESPACE     NAME                             READY   STATUS
 kube-system   coredns-5dd5756b68-5h2st         0/1     ContainerCreating
 kube-system   coredns-5dd5756b68-lcwvm         0/1     ContainerCreating
@@ -340,7 +326,6 @@ kubectl apply -f https://projectcalico.docs.tigera.io/manifests/calico.yaml
 - Wait until all the pods status are running :
 
 ```
-
 # watch the pods progress
 watch kubectl get pods -n kube-system
 
@@ -357,7 +342,7 @@ For single VM we don't really need that, because we're just running it in single
 # edit the coredns config 
 kubectl edit -n kube-system deployment coredns
 
-# -- edit the replicas value to 1, you'll enter in vi mode
+# --edit the replicas value to 1, you'll enter in vi mode
 spec:
   progressDeadlineSeconds: 600
   replicas: 1
@@ -371,7 +356,7 @@ spec:
 # check dns
 kubectl -n kube-system get pods
 
-# -- output from above command
+# --output from above command
 NAME                                       READY   STATUS    RESTARTS   AGE
 calico-kube-controllers-7ddc4f45bc-p2c8q   1/1     Running   0          14m
 calico-node-wxcc9                          1/1     Running   0          14m
@@ -402,7 +387,7 @@ Before we move forward, our steps so far are just for setting up single node clu
 meaning we don't have any other worker nodes around it. 
 
 By default, K8s assumes you will be connecting other nodes to your master node
-to make a 'proper' cluster. So to stop us from placing our Pods on your master,
+to make a 'proper' cluster. So to stop us from placing our Pods in the master,
 they have applied a taint to your node, which is called 'NoSchedule'.
 
 And we need to remove it's taint mode. Otherwise, our pods will be stuck
@@ -414,7 +399,7 @@ in a pending state.
 # check the taint status
 kubectl get node master -o yaml
 
-# -- output from above command
+# --output from above command
 taints:
   - effect: NoSchedule
     key: node-role.kubernetes.io/control-plane
@@ -433,7 +418,7 @@ kubectl label node master node-role.kubernetes.io/worker=
 # see our node again
 kubectl get nodes
 
-# -- output from above command
+# --output from above command
 NAME     STATUS   ROLES                  AGE   VERSION
 master   Ready    control-plane,worker   18h   v1.28.2
 
@@ -441,7 +426,7 @@ master   Ready    control-plane,worker   18h   v1.28.2
 
 Great! now we can start testing out our cluster by deploying a test app into it.
 
-- Create the test yaml file (nginx) :
+- Create a test yaml file (nginx) :
 
 ```
 # create test-app.yaml
@@ -451,7 +436,7 @@ nano test-app.yaml
 apiVersion: apps/v1 # for versions before 1.9.0 use apps/v1beta2
 kind: Deployment
 metadata:
-  name: test-app
+  name: nginx
   labels:
     app: nginx
 spec:
@@ -472,7 +457,7 @@ spec:
 
 ```
 
-- Deploy the the test app :
+- Deploy the test app :
 
 ```
 # deploy the app
@@ -481,17 +466,62 @@ kubectl apply -f test-app.yaml
 # check the status
 kubectl get pods
 
-# -- output from above command
-NAME                      READY   STATUS    RESTARTS   AGE
-test-app-584b4f6d78-p7wzx   1/1     Running   0          3m8s
-test-app-584b4f6d78-vtpn9   1/1     Running   0          3m8s
+# --output from above command
+NAME                     READY   STATUS    RESTARTS   AGE
+nginx-584b4f6d78-p7wzx   1/1     Running   0          3m8s
+nginx-584b4f6d78-vtpn9   1/1     Running   0          3m8s
 
 ```
 
+- Digging more into our test app :
 
+```
+# get the ip
+kubectl get pods -o wide
 
+# -- output from above command (truncated)
+NAME				IP
+nginx-584b4f6d78-p7wzx		192.168.219.71
+nginx-584b4f6d78-vtpn9		192.168.219.70
 
+# ping
+ping 192.168.219.71
+PING 192.168.219.71 (192.168.219.71) 56(84) bytes of data.
+64 bytes from 192.168.219.71: icmp_seq=1 ttl=64 time=0.114 ms
+64 bytes from 192.168.219.71: icmp_seq=2 ttl=64 time=0.036 ms
 
+# check the name of our container
+kubectl get pods nginx-584b4f6d78-p7wzx -o jsonpath='{.spec.containers[*].name}'
 
-* still in progress..
+# --output from above command
+nginx
 
+# we can even login inside the container 
+kubectl exec -it nginx-584b4f6d78-p7wzx -c nginx -- /bin/bash
+
+# --output from above command
+root@nginx-584b4f6d78-p7wzx:/# pwd
+/
+exit
+
+# access the nginx web using curl or you can use browser
+curl http://192.168.219.71
+
+# --output from above command
+<!DOCTYPE html>
+<html>
+<head>
+<title>Welcome to nginx!</title>
+<style>
+    body {
+        width: 35em;
+        margin: 0 auto;
+        font-family: Tahoma, Verdana, Arial, sans-serif;
+    }
+</style>
+</head>
+
+```
+
+There you have it, a fully functioning Kubernetes Cluster in a single Node/VM,
+that is perfect for homelab learning environment!
