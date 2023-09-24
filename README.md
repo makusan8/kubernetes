@@ -398,5 +398,100 @@ kubectl get --raw='/readyz?verbose'
 
 ```
 
+Before we move forward, our steps so far are just for setting up single node cluster,
+meaning we don't have any other worker nodes around it. 
+
+By default, K8s assumes you will be connecting other nodes to your master node
+to make a 'proper' cluster. So to stop us from placing our Pods on your master,
+they have applied a taint to your node, which is called 'NoSchedule'.
+
+And we need to remove it's taint mode. Otherwise, our pods will be stuck
+in a pending state.
+
+- Check the taints :
+
+```
+# check the taint status
+kubectl get node master -o yaml
+
+# -- output from above command
+taints:
+  - effect: NoSchedule
+    key: node-role.kubernetes.io/control-plane
+
+```
+
+- Remove the taints :
+
+```
+# remove the taints
+kubectl taint nodes --all node-role.kubernetes.io/control-plane=:NoSchedule-
+
+# add worker labal to master node
+kubectl label node master node-role.kubernetes.io/worker=
+
+# see our node again
+kubectl get nodes
+
+# -- output from above command
+NAME     STATUS   ROLES                  AGE   VERSION
+master   Ready    control-plane,worker   18h   v1.28.2
+
+```
+
+Great! now we can start testing out our cluster by deploying a test app into it.
+
+- Create the test yaml file (nginx) :
+
+```
+# create test-app.yaml
+nano test-app.yaml
+
+# copy paste this config below
+apiVersion: apps/v1 # for versions before 1.9.0 use apps/v1beta2
+kind: Deployment
+metadata:
+  name: test-app
+  labels:
+    app: nginx
+spec:
+  selector:
+    matchLabels:
+      app: nginx
+  replicas: 2 # tells deployment to run 2 pods matching the template
+  template:
+    metadata:
+	labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.18.0
+        ports:
+        - containerPort: 80
+
+```
+
+- Deploy the the test app :
+
+```
+# deploy the app
+kubectl apply -f test-app.yaml
+
+# check the status
+kubectl get pods
+
+# -- output from above command
+NAME                      READY   STATUS    RESTARTS   AGE
+test-app-584b4f6d78-p7wzx   1/1     Running   0          3m8s
+test-app-584b4f6d78-vtpn9   1/1     Running   0          3m8s
+
+```
+
+
+
+
+
+
 * still in progress..
 
