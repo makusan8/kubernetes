@@ -1,9 +1,10 @@
 
 # Kubernetes / K8s
 
-## How-To setup basic Kubernetes cluster in a single VM
+## How-To setup Kubernetes cluster in a single VM
 
 Prequisites (at least):
+  - Basic kubernetes knowledge
   - Debian 12 minimal
   - 2 core
   - 2gb ram
@@ -109,7 +110,8 @@ sudo lvextend -r -l +100%FREE debian-vg/root
 > If you want to automatically install k8s, 
 > you can just run my script ks8_install.sh
 > this will cover the installation until step 3 : 
->
+
+> [!NOTE]
 > chmod +x ks8_install.sh
 > sudo ./ks8_install.sh
 
@@ -218,12 +220,149 @@ sudo systemctl daemon-reload
 sudo systemctl enable kubelet
 ```
 
-Finally done..
+Finally done for our installation..
 
 
 ## 4. Start K8s Cluster
 
+Now we can start and initiate our cluster :
 
+[!NOTE]
+> the --pod-network-cidr ip range below is optional,
+> as long it doesn't interfere with our LAN network.
+
+```
+# initiate cluster
+cd ~/
+sudo kubeadm init --node-name master --pod-network-cidr=192.168.0.0/16
+```
+
+The cluster will take some time to finish, because it will download first
+few images and store them into cri-o container.
+
+Once it's finished, verify the images : 
+
+```
+# check the images
+sudo crictl images
+
+# -- output from command above
+registry.k8s.io/coredns/coredns           v1.10.1
+registry.k8s.io/etcd                      3.5.9-0 
+registry.k8s.io/kube-apiserver            v1.28.2 
+registry.k8s.io/kube-controller-manager   v1.28.2 
+registry.k8s.io/kube-proxy                v1.28.2
+registry.k8s.io/kube-scheduler            v1.28.2
+registry.k8s.io/pause                     3.6     
+registry.k8s.io/pause                     3.9
+
+```
+
+Let's make kubectl work for current user :
+
+```
+# copy kubectl config
+mkdir -p $HOME/.kube
+sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
+```
+
+Now, we can run kubectl command without sudo.
+
+Let's verify our node :
+
+```
+# check the nodes
+kubectl get nodes
+
+# -- output from above command
+NAME     STATUS   ROLES           AGE   VERSION
+master   Ready    control-plane   28m   v1.28.2
+
+# full view of the nodes
+kubectl get nodes -o wide
+```
+
+Cluster pods :
+
+```
+# check the pods
+kubectl get pods --all-namespaces -o wide
+
+# -- output from above command
+NAMESPACE     NAME                             READY   STATUS
+kube-system   coredns-5dd5756b68-5h2st         0/1     ContainerCreating
+kube-system   coredns-5dd5756b68-lcwvm         0/1     ContainerCreating
+
+```
+
+As you can see, the coredns pods above are in Creating/Pending state. These pods
+are responsible for our internal DNS inside the cluster.
+
+It turns out we don't have any network plugin yet in our cluster.
+
+So let's install that, we're gonna use calico :
+
+```
+# install calico network add-on
+kubectl apply -f https://projectcalico.docs.tigera.io/manifests/calico.yaml
+
+```
+
+You can watch and wait the status until all the pods are running :
+
+```
+# watch the pods progress
+watch kubectl get pods -n kube-system
+
+# control + c after all are running
+```
+
+If you've noticed, there are two coredns running in our cluster. For single vm we
+don't need that, because we're just running in single node.
+
+Trim down the CoreDNS :
+
+```
+# edit the coredns config 
+kubectl edit -n kube-system deployment coredns
+
+# -- edit the replicas value to 1, you'll enter in vi mode
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 10
+
+```
+
+Check again the CoreDNS :
+
+```
+# check dns
+kubectl -n kube-system get pods
+
+# -- output from above command
+NAME                                       READY   STATUS    RESTARTS   AGE
+calico-kube-controllers-7ddc4f45bc-p2c8q   1/1     Running   0          14m
+calico-node-wxcc9                          1/1     Running   0          14m
+coredns-5dd5756b68-5h2st                   1/1     Running   0          60m
+etcd-master                                1/1     Running   0          60m
+kube-apiserver-master                      1/1     Running   0          60m
+kube-controller-manager-master             1/1     Running   0          60m
+kube-proxy-rlcmm                           1/1     Running   0          60m
+kube-scheduler-master                      1/1     Running   0          60m
+
+```
+
+We also can see the information of our node from various commands :
+
+```
+kubectl get nodes -o wide
+kubectl cluster-info
+kubectl get --raw='/readyz?verbose'
+
+```
 
 * still in progress..
 
