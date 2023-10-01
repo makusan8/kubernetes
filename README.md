@@ -629,7 +629,7 @@ helm install wordpress bitnami/wordpress \
 
 ```
 
-- Access the Wordpress App :
+- Accessing the Wordpress App :
 
 ```
 # get the WordPress IP by running below commands:
@@ -661,13 +661,13 @@ curl http://10.105.180.2
 href="http://10.105.180.2/feed/" />
 
 ```
-
-Since our master node doesn't have any gui installed we can just only view the
-wordpress with curl but not with a browser, how about accessing it from our workstation pc? 
-
-FYI, my master node does have an IP (eth1) : 192.168.46.213, that's in the same LAN
-with my pc and as you can see from the command "kubectl get svc --namespace default -w wordpress" above
-the wordpress also does have an external port to it which is "80:31781/TCP,443:31669/TCP"
+> [!NOTE]
+> Since our master node doesn't have any gui installed we can just only view the
+> wordpress with curl but not with a browser, how about accessing it from our workstation pc? 
+>
+> FYI, my master node does have an IP (eth1) : 192.168.46.213, that's in the same LAN
+> with my pc and as you can see from the command "kubectl get svc --namespace default -w wordpress" above
+> the wordpress also does have an external port to it which is "80:31781/TCP,443:31669/TCP"
 
 - With that being said, open your pc's browser and :
 
@@ -684,9 +684,9 @@ Password : 6O6owIi6g4
 
 ```
 
-Voila!, you should be able to see the Wordpress now
+Voila!, you should be able to see the Wordpress webpage now
 
 
-## 6. Deprovision cluster
+## 6. Removing cluster
 
 - still working on it
