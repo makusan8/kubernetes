@@ -234,7 +234,7 @@ sudo systemctl enable kubelet
 Finally we're almost ready..
 
 
-## 4. Start K8s Cluster
+## 4. Start K8s Cluster & Deploy Test App
 
 Now we can start initiating our cluster :
 
@@ -412,7 +412,7 @@ taints:
 # remove the taints
 kubectl taint nodes --all node-role.kubernetes.io/control-plane=:NoSchedule-
 
-# add worker labal to master node
+# add worker label to master node
 kubectl label node master node-role.kubernetes.io/worker=
 
 # see our node again
@@ -524,4 +524,49 @@ curl http://192.168.219.71
 ```
 
 There you have it, a fully functioning Kubernetes Cluster in a single Node/VM,
-that is perfect for homelab learning environment!
+that is convenient for homelab learning environment!
+
+
+## 5. Extra
+
+We could do more things to our bare cluster.
+
+- Install metrics-server :
+
+```
+# check if it's installed
+kubectl top nodes
+
+# --output from above command
+error: Metrics API not available
+
+# deploy metrics-server
+kubectl apply -f \
+https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+
+# edit config
+kubectl -n kube-system edit deployment metrics-server
+
+# --output from above command, add --kubelet-insecure-tls
+containers:
+  - args:
+    - --kubelet-insecure-tls
+
+# after few minutes, check again the metrics
+kubectl -n kube-system top pods
+kubectl top nodes
+
+# --output from above command
+NAME                                       CPU(cores)   MEMORY(bytes)   
+calico-kube-controllers-7ddc4f45bc-p2c8q   2m           26Mi
+calico-node-wxcc9                          34m          171Mi
+coredns-5dd5756b68-5h2st                   2m           23Mi
+etcd-master                                21m          87Mi
+kube-apiserver-master                      44m          311Mi
+kube-controller-manager-master             12m          54Mi
+kube-proxy-rlcmm                           3m           25Mi
+kube-scheduler-master                      3m           26Mi
+metrics-server-69b546b776-cblpb            3m           13Mi
+
+
+```
