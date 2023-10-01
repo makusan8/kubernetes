@@ -527,7 +527,7 @@ There you have it, a fully functioning Kubernetes Cluster in a single Node/VM,
 that is convenient for homelab learning environment!
 
 
-## 5. Extra
+## 5. Extras
 
 We could do more things to our bare cluster.
 
@@ -568,5 +568,125 @@ kube-proxy-rlcmm                           3m           25Mi
 kube-scheduler-master                      3m           26Mi
 metrics-server-69b546b776-cblpb            3m           13Mi
 
+```
+
+- Install Helm (helps you manage Kubernetes applications) :
 
 ```
+# install helm
+curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
+
+# --output after above command
+Verifying checksum... Done.
+Preparing to install helm into /usr/local/bin
+helm installed into /usr/local/bin/helm
+
+```
+
+- Install persistant storage CSI driver (openebs) :
+
+```
+# add openebs repo to helm
+helm repo add openebs https://openebs.github.io/charts
+
+# create openebs namespace
+kubectl create namespace openebs
+
+# install openebs 
+helm --namespace=openebs install openebs openebs/openebs
+
+# --output after above command
+NAMESPACE: openebs
+STATUS: deployed
+REVISION: 1
+TEST SUITE: None
+NOTES:
+Successfully installed OpenEBS.
+
+# check openebs status
+kubectl get pods -n openebs
+
+# --output from above command, openebs will take a few minutes to be ready
+NAME                                           READY   STATUS    RESTARTS   AGE
+openebs-localpv-provisioner-667f7d88df-fk7wv   1/1     Running   0          7m54s       
+openebs-ndm-2wcnn                              1/1     Running   0          7m54s       
+openebs-ndm-operator-749c89d955-78j6w          1/1     Running   0          7m54s
+
+```
+
+- Install Wordpress App using Helm with openebs storage :
+
+```
+# add bitnami repo to helm
+helm repo add bitnami https://charts.bitnami.com/bitnami
+
+# --output from above command
+"bitnami" has been added to your repositories
+
+# install wordpress app
+helm install wordpress bitnami/wordpress \
+  --set=global.storageClass=openebs-hostpath
+
+```
+
+- Access the Wordpress App :
+
+```
+# get the WordPress IP by running below commands:
+kubectl describe svc wordpress
+kubectl get svc --namespace default -w wordpress
+
+# --output from above command
+NAME        TYPE           CLUSTER-IP     EXTERNAL-IP   PORT(S)                      AGE
+wordpress   LoadBalancer   10.105.180.2   <pending>     80:31781/TCP,443:31669/TCP   4m31s
+
+# retrieve the password
+(kubectl get secret --namespace default wordpress -o jsonpath="{.data.wordpress-password}" | base64 -d)
+
+# --output from above command, yours can be different
+6O6owIi6g4
+
+# lets check the wordpress
+curl http://10.105.180.2
+
+# --output from above, if you see similar output below then our wordpress is up and running 
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name='robots' content='max-image-preview:large' />
+<title>User&#039;s Blog!</title>
+<link rel="alternate" type="application/rss+xml" title="User&#039;s Blog! &raquo; Feed" 
+href="http://10.105.180.2/feed/" />
+
+```
+
+Since our master node doesn't have any gui installed we can just only view the
+wordpress with curl but not with a browser, how about accessing it from our workstation pc? 
+
+FYI, my master node does have an IP (eth1) : 192.168.46.213, that's in the same LAN
+with my pc and as you can see from the command "kubectl get svc --namespace default -w wordpress" above
+the wordpress also does have an external port to it which is "80:31781/TCP,443:31669/TCP"
+
+- With that being said, open your pc's browser and :
+
+```
+# access from pc
+http://192.168.46.213:31781
+
+# admin panel 
+http://192.168.46.213:31781/admin
+
+# login using the password we just gathered from above section
+Username : user
+Password : 6O6owIi6g4
+
+```
+
+Voila!, you should be able to see the Wordpress now
+
+
+## 6. Deprovision cluster
+
+- still working on it
