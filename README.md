@@ -629,7 +629,7 @@ helm install wordpress bitnami/wordpress \
 
 ```
 
-- Accessing the Wordpress App :
+- Access the Wordpress App :
 
 ```
 # get the WordPress IP by running below commands:
@@ -662,10 +662,10 @@ href="http://10.105.180.2/feed/" />
 
 ```
 > [!NOTE]
-> Since our master node doesn't have any gui installed we can just only view the
-> wordpress with curl but not with a browser, how about accessing it from our workstation pc? 
+> Since our master node doesn't have any gui installed we can't view the
+> wordpress normally, however we still can access it from our workstation pc. 
 >
-> FYI, my master node does have an IP (eth1) : 192.168.46.213, that's in the same LAN
+> FYI, my master node have an IP (eth1) : 192.168.46.213, that's in the same LAN
 > with my pc and as you can see from the command "kubectl get svc --namespace default -w wordpress" above
 > the wordpress also does have an external port to it which is "80:31781/TCP,443:31669/TCP"
 
@@ -678,7 +678,7 @@ http://192.168.46.213:31781
 # admin panel 
 http://192.168.46.213:31781/admin
 
-# login using the password we just gathered from above section
+# you can login using the password we just gathered from above section
 Username : user
 Password : 6O6owIi6g4
 
@@ -687,6 +687,39 @@ Password : 6O6owIi6g4
 Voila!, you should be able to see the Wordpress webpage now
 
 
-## 6. Removing cluster
+## 6. Removing the cluster
 
-- still working on it
+Deleting the cluster is not simple as you might think unlike Docker where we can remove
+any instances of our app easily. Also by leaving the cluster running just as it is does
+consume quite of ram usage in the background.
+
+Let say after we're done with our testing or want to start a new fresh installation
+
+- Deleting the cluster :
+
+```
+# memory usage from htop
+htop
+
+0[|||                             5.2%] Tasks: 83, 208 thr, 118 kthr; 1 running     
+1[|||                             5.3%] Load average: 1.72 1.16 0.70 
+2[||                              3.3%] Uptime: 00:18:18
+3[||                              3.3%]
+Mem[|||||||||||||||||      1.28G/5.81G]
+Swp[                             0K/0K]
+
+# check our nodes name
+kubectl get nodes
+
+# drain our master node, this will evicting all our pods
+kubectl drain master --delete-emptydir-data --force --ignore-daemonsets
+
+# clean iptables 
+sudo iptables -F && sudo iptables -t nat -F && sudo iptables -t mangle -F && sudo iptables -X
+
+# delete node and reset
+kubectl delete node master
+sudo kubeadm reset
+rm -rf ~/.kube
+
+```
