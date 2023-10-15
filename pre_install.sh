@@ -6,7 +6,7 @@
 # install some utility
 echo '###Installing utility apps..'
 
-nala install git ethtool htop net-tools tree neovim -y
+nala install git ethtool htop net-tools tree -y
 sleep 2
 
 # configure sysctl tweaks
